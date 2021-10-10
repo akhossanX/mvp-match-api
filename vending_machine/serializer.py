@@ -1,26 +1,38 @@
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import *
+from vending_machine.models import User, Product
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
         max_length=50, min_length=6, write_only=True, allow_blank=False
     )
+    id = serializers.ReadOnlyField()
 
     class Meta:
         model = User
-        fields = '__all__'
+        fields = ('id', 'username', 'password', 'deposit', 'role')
 
     def create(self, validated_data):
-        # Hash the password if It is supplied
-        if 'password' in validated_data:
-            validated_data['password'] = make_password(validated_data['password'])
+        _user = User(**validated_data)
+        _user.set_password(validated_data['password'])
+        _user.save()
+        return _user
 
-        return User.objects.create(**validated_data)
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+
+        for (key, value) in validated_data.items():
+            setattr(instance, key, value)
+
+        if password is not None:
+            instance.set_password(password)
+
+        instance.save()
+        return instance
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = '__all__'
+        fields = ('id', 'product_name', 'seller', 'cost', 'amount_available')
