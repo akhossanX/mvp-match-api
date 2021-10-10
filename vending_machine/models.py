@@ -1,39 +1,83 @@
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
+from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
+from mvp.settings import AUTH_USER_MODEL
 
 
-class User(models.Model):
+class UserRoleChoices(models.TextChoices):
+    BUYER = 'buyer'
+    SELLER = 'seller'
 
-    class DepositChoices(models.IntegerChoices):
-        COIN_ZERO = 0  # Default deposit upon user creation or if no deposit is supplied
-        COIN_FIVE = 5
-        COIN_TEN = 10
-        COIN_TWENTY = 20
-        COIN_FIFTY = 50
-        COIN_HUNDRED = 100
 
-    class UserRoleChoices(models.TextChoices):
-        SELLER = 'seller'
-        BUYER = 'buyer'
+class CoinChoices(models.IntegerChoices):
+    # 5, 10, 20, 50 and 100
+    COIN_5 = 5
+    COIN_10 = 10
+    COIN_20 = 20
+    COIN_50 = 50
+    COIN_100 = 100
 
-    username = models.CharField(max_length=255, unique=True, blank=False)
-    password = models.CharField(max_length=255, blank=False)
-    deposit = models.IntegerField(
-        choices=DepositChoices.choices,
-        default=0,
-        null=False
-    )
-    role = models.CharField(
-        max_length=255,
-        choices=UserRoleChoices.choices,
-        default='buyer',
-        null=False
-    )
+
+class MyUserManager(BaseUserManager):
+    """
+    Custom user manager
+    override create_user and create_superuser method of BaseUserManager
+    """
+    def create_user(self, username, password):
+        """
+        Creates new user and saves it to database
+        """
+        if not username:
+            raise ValueError(_("Users must have a username field"))
+        if not password:
+            raise ValueError(_("Users must specify a password field"))
+        user = self.model(username=username)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, username, password=None):
+        """
+        Creates and saves a superuser with the given username and password.
+        """
+        user = self.create_user(
+            username,
+            password=password,
+        )
+        user.is_admin = True
+        user.save(using=self._db)
+        return user
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+
+    username = models.CharField(max_length=255, unique=True)
+    role = models.CharField(choices=UserRoleChoices.choices, default=UserRoleChoices.BUYER, max_length=20)
+    deposit = models.IntegerField(choices=CoinChoices.choices, default=0)
+
+    is_active = models.BooleanField(default=True)
+    is_admin = models.BooleanField(default=False)
+
+    objects = MyUserManager()
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['']
+
+    def __str__(self):
+        return self.username
+
+    def has_perm(self, perm, obj=None):
+        return True
+
+    @property
+    def is_staff(self):
+        return self.is_admin
 
 
 class Product(models.Model):
     product_name = models.CharField(max_length=255)
     cost = models.IntegerField()
-    amount_available = models.IntegerField()
-    seller_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount_available = models.IntegerField(null=True)
+    seller = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
