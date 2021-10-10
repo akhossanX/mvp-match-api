@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# Django Autofield
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+# Custom use model
+AUTH_USER_MODEL = 'vending_machine.User'
 
 # Application definition
 
@@ -39,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'vending_machine',
     'rest_framework',
+    'rest_framework.authtoken'
 ]
 
 MIDDLEWARE = [
