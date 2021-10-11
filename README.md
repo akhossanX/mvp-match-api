@@ -26,3 +26,19 @@ Your vending machine should only accept 5, 10, 20, 50 and 100 cent coins
     API should return total they’ve spent, products they’ve purchased and their change if there’s any (in 5, 10, 20, 50 and 100 cent coins)
 
 * Implement /reset endpoint so users with a “buyer” role can reset their deposit.
+
+## Installation
+
+1. **Clone the repository**: `git clone https://github.com/akhossanX/mvp-match-api`
+
+2. **Setup a virtual environment:**
+   1. Install virtualenv or any other virtual environment:  `sudo pip3 install virtualenv`
+   2. Now create a virtual environment: `python3 -m venv myenv` 
+   3. Active your virtual environment: `source venv/bin/activate`
+   
+3. **Install requirements:** `cd path/to/project/mvp-match-api && pip install -r requirements.txt`
+4. **Migrate Database:** `python manage.py makemigrations && python manage.py migrate`
+5. **Run Tests:**
+   1. Using coverage: `coverage run manage.py test vending-machine && coverage report`
+   2. Using django test command: `python manage.py test vending-machine`
+    
