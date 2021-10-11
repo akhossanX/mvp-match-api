@@ -33,8 +33,8 @@ Your vending machine should only accept 5, 10, 20, 50 and 100 cent coins
 
 2. **Setup a virtual environment:**
    1. Install virtualenv or any other virtual environment:  `sudo pip3 install virtualenv`
-   2. Now create a virtual environment: `python3 -m venv myenv` 
-   3. Active your virtual environment: `source venv/bin/activate`
+   2. Now create a virtual environment: `python3 -m venv mvp-env` 
+   3. Active your virtual environment: `source mvp-env/bin/activate`
    
 3. **Install requirements:** `cd path/to/project/mvp-match-api && pip install -r requirements.txt`
 4. **Migrate Database:** `python manage.py makemigrations && python manage.py migrate`
